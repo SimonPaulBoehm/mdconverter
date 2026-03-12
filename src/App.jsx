@@ -57,7 +57,6 @@ img{max-width:100%;border-radius:6px;display:block;margin:.5em auto;}
 .kh{display:flex;justify-content:space-between;padding-bottom:.6em;margin-bottom:2em;border-bottom:1px solid #e4e3dc;font-family:'Source Code Pro',monospace;font-size:.72em;color:#aaa;letter-spacing:.04em;}
 .kf{display:flex;justify-content:space-between;padding-top:.6em;margin-top:3em;border-top:1px solid #e4e3dc;font-family:'Source Code Pro',monospace;font-size:.72em;color:#aaa;letter-spacing:.04em;}
 @media print{
-  /* Zero out @page margins — padding on #write handles spacing */
   @page { size:A4; margin:0; }
   html,body{
     background:#f5f5f0 !important;
@@ -130,7 +129,6 @@ img{max-width:100%;border-radius:6px;display:block;margin:.5em auto;}
 .kh{display:flex;justify-content:space-between;padding-bottom:.6em;margin-bottom:2em;border-bottom:1px solid #2c2f38;font-family:'Source Code Pro',monospace;font-size:.72em;color:#3a4050;letter-spacing:.04em;}
 .kf{display:flex;justify-content:space-between;padding-top:.6em;margin-top:3em;border-top:1px solid #2c2f38;font-family:'Source Code Pro',monospace;font-size:.72em;color:#3a4050;letter-spacing:.04em;}
 @media print{
-  /* Zero @page margins — #write padding handles all spacing */
   @page { size:A4; margin:0; }
   html,body{
     background:#1c1e24 !important;
@@ -182,7 +180,7 @@ ${ftr}
 
 export default function App() {
   const [html, setHtml]             = useState("");
-  const [inputMode, setInputMode]   = useState("html"); // "html" | "markdown"
+  const [inputMode, setInputMode]   = useState("html");
   const [themes, setThemes]         = useState(DEFAULT_THEMES);
   const [themeId, setThemeId]       = useState("konayuki-light");
   const [title, setTitle]           = useState("Document");
@@ -190,6 +188,7 @@ export default function App() {
   const [showHeader, setShowHeader] = useState(false);
   const [showFooter, setShowFooter] = useState(false);
   const [tab, setTab]               = useState("input");
+  const [livePreview, setLivePreview] = useState(false);
   const [dragOver, setDragOver]     = useState(false);
   const [customName, setCustomName] = useState("");
   const [toast, setToast]           = useState(null);
@@ -236,6 +235,159 @@ export default function App() {
     r.readAsText(file);
   }, [customName]);
 
+  const downloadTemplate = () => {
+    const css = `/* ============================================================
+   Konayuki PDF — Custom Theme Template
+   ============================================================
+   Upload this file in the "Custom Theme" panel to use it.
+   The #write element wraps all document content.
+   Fonts: any Google Fonts @import works here.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* Reset */
+*, *::before, *::after { box-sizing: border-box; }
+
+/* ── Page background (visible outside the content column) ── */
+html {
+  margin: 0; padding: 0;
+  background: #f0f0f0;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+body {
+  margin: 0; padding: 0;
+  background: #f0f0f0;
+  color: #222;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+/* ── Main content column ── */
+#write {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 60px 72px 80px;
+  min-height: 100vh;
+  background: #ffffff;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+/* ── Headings ── */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  line-height: 1.25;
+  margin: 1.8em 0 0.6em;
+}
+h1 { font-size: 2em;   color: #111; border-bottom: 2px solid #ddd; padding-bottom: 0.3em; margin-top: 0.5em; }
+h2 { font-size: 1.5em; color: #222; border-bottom: 1px solid #eee; padding-bottom: 0.2em; }
+h3 { font-size: 1.2em; color: #333; }
+h4 { font-size: 1.05em; font-style: italic; }
+h5, h6 { font-size: 0.9em; color: #666; text-transform: uppercase; letter-spacing: 0.06em; }
+
+/* ── Body text ── */
+p  { margin: 0 0 1.1em; }
+a  { color: #0066cc; text-decoration: none; border-bottom: 1px solid rgba(0,102,204,0.3); }
+a:hover { border-bottom-color: #0066cc; }
+strong { font-weight: 700; }
+em     { font-style: italic; }
+mark   { background: #fff3b0; padding: 0 3px; border-radius: 2px; }
+
+/* ── Code ── */
+code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.875em;
+  background: #f3f3f3;
+  color: #d44;
+  padding: 0.1em 0.4em;
+  border-radius: 4px;
+  border: 1px solid #e0e0e0;
+}
+pre {
+  background: #f3f3f3;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1.1em 1.4em;
+  margin: 1.4em 0;
+  overflow-x: auto;
+  line-height: 1.6;
+}
+pre code { background: none; border: none; padding: 0; color: inherit; font-size: 0.875em; }
+
+/* ── Blockquote ── */
+blockquote {
+  border-left: 4px solid #0066cc;
+  background: #f0f6ff;
+  margin: 1.4em 0;
+  padding: 0.8em 1.3em;
+  border-radius: 0 6px 6px 0;
+  color: #445;
+  font-style: italic;
+}
+blockquote p:last-child { margin-bottom: 0; }
+
+/* ── Lists ── */
+ul, ol { padding-left: 1.8em; margin: 0 0 1.1em; }
+li     { margin-bottom: 0.35em; }
+
+/* ── Tables ── */
+table   { width: 100%; border-collapse: collapse; margin: 1.4em 0; font-size: 0.94em; }
+thead   { background: #f5f5f5; }
+th      { padding: 0.55em 0.9em; text-align: left; font-weight: 600; font-size: 0.85em;
+          text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 2px solid #ddd; }
+td      { padding: 0.5em 0.9em; border-bottom: 1px solid #eee; }
+tr:last-child td { border-bottom: none; }
+tr:nth-child(even) td { background: #fafafa; }
+
+/* ── Misc ── */
+hr  { border: none; border-top: 1px solid #ddd; margin: 2em 0; }
+img { max-width: 100%; border-radius: 6px; display: block; margin: 0.5em auto; }
+
+/* ── Header / footer bars (toggled in the sidebar) ── */
+.kh, .kf {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72em;
+  color: #aaa;
+  letter-spacing: 0.04em;
+}
+.kh { padding-bottom: 0.6em; margin-bottom: 2em;  border-bottom: 1px solid #eee; }
+.kf { padding-top:    0.6em; margin-top:    3em;   border-top:    1px solid #eee; }
+
+/* ── Print / PDF ── */
+@media print {
+  @page { size: A4; margin: 0; }
+  html, body {
+    background: #f0f0f0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  #write {
+    max-width: 100% !important;
+    padding: 20mm 22mm !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+`;
+    const blob = new Blob([css], { type: "text/css" });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a");
+    a.href = url; a.download = "my-theme.css";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const renderedHtml = inputMode === "markdown" ? marked.parse(html) : html;
   const doc = buildDoc(renderedHtml, theme, { title, date, showHeader, showFooter });
 
@@ -276,7 +428,6 @@ export default function App() {
         color:"#c8c4bc",
         overflow:"hidden"
       }}>
-        {/* Topbar */}
         <div style={{
           display:"flex", alignItems:"center", justifyContent:"space-between",
           height:48, padding:"0 16px",
@@ -310,11 +461,20 @@ export default function App() {
           </div>
 
           <div style={{display:"flex",gap:8,flexShrink:0}}>
-            <button onClick={()=>setTab(t=>t==="input"?"preview":"input")} style={{
-              background:"#252830", border:"1px solid #2e3240", color:"#aaa",
+            <button onClick={()=>setLivePreview(v=>!v)} style={{
+              background: livePreview ? "#1e2a3a" : "#252830",
+              border: livePreview ? "1px solid #2a4060" : "1px solid #2e3240",
+              color: livePreview ? "#7aaddc" : "#aaa",
               borderRadius:7, padding:"6px 13px", fontSize:12.5, fontFamily:"inherit",
-              fontWeight:500, cursor:"pointer"
-            }}>{tab==="input" ? "Preview →" : "← Edit"}</button>
+              fontWeight:500, cursor:"pointer", display:"flex", alignItems:"center", gap:5
+            }}>⬜ Live</button>
+            {!livePreview && (
+              <button onClick={()=>setTab(t=>t==="input"?"preview":"input")} style={{
+                background:"#252830", border:"1px solid #2e3240", color:"#aaa",
+                borderRadius:7, padding:"6px 13px", fontSize:12.5, fontFamily:"inherit",
+                fontWeight:500, cursor:"pointer"
+              }}>{tab==="input" ? "Preview →" : "← Edit"}</button>
+            )}
             <button onClick={handlePrint} disabled={!html.trim()} style={{
               background: html.trim() ? "#3a6fb0" : "#252830",
               border: html.trim() ? "none" : "1px solid #2e3240",
@@ -326,10 +486,7 @@ export default function App() {
           </div>
         </div>
 
-        {/* Body */}
         <div style={{display:"flex", flex:1, overflow:"hidden", minHeight:0}}>
-
-          {/* Sidebar */}
           <div style={{
             width:256, minWidth:240, background:"#14161a",
             borderRight:"1px solid #1e2025", overflowY:"auto", flexShrink:0
@@ -361,6 +518,12 @@ export default function App() {
               }}>↑ Upload CSS file</div>
               <input ref={themeRef} type="file" accept=".css" style={{display:"none"}}
                 onChange={e=>{loadCss(e.target.files?.[0]); e.target.value="";}}/>
+              <button onClick={downloadTemplate} style={{
+                width:"100%", marginTop:7, background:"none",
+                border:"1px solid #2e3240", borderRadius:6,
+                color:"#3a4a5a", fontSize:11, fontFamily:"inherit",
+                padding:"5px 0", cursor:"pointer", letterSpacing:"0.02em"
+              }}>↓ Download template</button>
               <p style={{fontSize:10,color:"#333",lineHeight:1.6,marginTop:7}}>
                 Any Typora-compatible CSS. Appended to theme list.
               </p>
@@ -390,15 +553,16 @@ export default function App() {
             </SideSection>
           </div>
 
-          {/* Content */}
           <div style={{
-            flex:1, display:"flex", flexDirection:"column",
+            flex:1, display:"flex", flexDirection: livePreview ? "row" : "column",
             overflow:"hidden", minWidth:0, minHeight:0, background:"#1a1c20"
           }}>
-            {tab === "input" ? (
+            {(livePreview || tab === "input") && (
               <div style={{
                 flex:1, display:"flex", flexDirection:"column",
-                padding:18, gap:14, overflowY:"auto", background:"#1a1c20"
+                padding:18, gap:14, overflowY:"auto", background:"#1a1c20",
+                borderRight: livePreview ? "1px solid #1e2025" : "none",
+                minWidth: livePreview ? 320 : 0
               }}>
                 <div
                   onDragOver={e=>{e.preventDefault();setDragOver(true);}}
@@ -451,7 +615,7 @@ export default function App() {
                   />
                 </div>
 
-                {html.trim() && (
+                {!livePreview && html.trim() && (
                   <button onClick={()=>setTab("preview")} style={{
                     alignSelf:"flex-start", background:"#3a6fb0", color:"white",
                     border:"none", borderRadius:7, padding:"7px 16px",
@@ -459,15 +623,18 @@ export default function App() {
                   }}>Preview →</button>
                 )}
               </div>
-            ) : (
+            )}
+
+            {(livePreview || tab === "preview") && (
               <iframe
-                key={themeId + showHeader + showFooter + title + date}
                 srcDoc={doc}
                 title="Preview"
                 sandbox="allow-same-origin"
                 style={{
-                  display:"block", width:"100%", height:"100%",
-                  border:"none", margin:0, padding:0, flexShrink:0, flexGrow:1
+                  display:"block",
+                  width: livePreview ? "50%" : "100%",
+                  height:"100%",
+                  border:"none", margin:0, padding:0, flexShrink:0
                 }}
               />
             )}
