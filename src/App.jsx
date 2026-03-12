@@ -236,13 +236,7 @@ export default function App() {
   }, [customName]);
 
   const downloadTemplate = () => {
-    const css = `/* ============================================================
-   Konayuki PDF — Custom Theme Template
-   ============================================================
-   Upload this file in the "Custom Theme" panel to use it.
-   The #write element wraps all document content.
-   Fonts: any Google Fonts @import works here.
-   ============================================================ */
+    const css = `
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
