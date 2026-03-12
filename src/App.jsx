@@ -1,10 +1,5 @@
 import { useState, useRef, useCallback } from "react";
-
-// The key fix for dark theme PDF margins:
-// 1. Set background on @page rule itself
-// 2. Use -webkit-print-color-adjust: exact on html AND body AND #write
-// 3. Remove @page margins entirely — let the content itself provide padding
-// 4. html/body background must match the theme bg so margins inherit it
+import { marked } from "marked";
 
 const KONAYUKI_LIGHT_CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Source+Code+Pro:wght@400;500&display=swap');
@@ -187,6 +182,7 @@ ${ftr}
 
 export default function App() {
   const [html, setHtml]             = useState("");
+  const [inputMode, setInputMode]   = useState("html"); // "html" | "markdown"
   const [themes, setThemes]         = useState(DEFAULT_THEMES);
   const [themeId, setThemeId]       = useState("konayuki-light");
   const [title, setTitle]           = useState("Document");
@@ -210,11 +206,15 @@ export default function App() {
 
   const loadHtml = useCallback(file => {
     if (!file) return;
-    if (!file.name.match(/\.(html?|htm)$/i)) { notify("Upload an .html file","error"); return; }
+    const isMd   = file.name.match(/\.md$/i);
+    const isHtml = file.name.match(/\.(html?|htm)$/i);
+    if (!isMd && !isHtml) { notify("Upload an .html or .md file","error"); return; }
     const r = new FileReader();
     r.onload = ev => {
       setHtml(ev.target.result);
-      setTitle(file.name.replace(/\.(html?|htm)$/i,""));
+      setTitle(file.name.replace(/\.(html?|htm|md)$/i,""));
+      if (isMd) setInputMode("markdown");
+      else setInputMode("html");
       notify(`Loaded ${file.name}`);
       setTab("preview");
     };
@@ -236,7 +236,8 @@ export default function App() {
     r.readAsText(file);
   }, [customName]);
 
-  const doc = buildDoc(html, theme, { title, date, showHeader, showFooter });
+  const renderedHtml = inputMode === "markdown" ? marked.parse(html) : html;
+  const doc = buildDoc(renderedHtml, theme, { title, date, showHeader, showFooter });
 
   const handlePrint = () => {
     const w = window.open("","_blank");
@@ -412,20 +413,34 @@ export default function App() {
                   }}
                 >
                   <div style={{fontSize:28,marginBottom:6}}>📄</div>
-                  <div style={{fontWeight:600,fontSize:13.5,color:"#555",marginBottom:3}}>Drop HTML file here</div>
-                  <div style={{fontSize:11.5,color:"#333"}}>or click to browse · .html / .htm</div>
-                  <input ref={fileRef} type="file" accept=".html,.htm" style={{display:"none"}}
+                  <div style={{fontWeight:600,fontSize:13.5,color:"#555",marginBottom:3}}>Drop file here</div>
+                  <div style={{fontSize:11.5,color:"#333"}}>or click to browse · .html / .htm / .md</div>
+                  <input ref={fileRef} type="file" accept=".html,.htm,.md" style={{display:"none"}}
                     onChange={e=>{loadHtml(e.target.files?.[0]); e.target.value="";}}/>
                 </div>
 
                 <div style={{display:"flex",flexDirection:"column",flex:1,minHeight:200}}>
-                  <div style={{fontSize:10,fontWeight:700,letterSpacing:"0.1em",textTransform:"uppercase",color:"#3a4050",marginBottom:7}}>
-                    Or paste HTML
+                  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:7}}>
+                    <div style={{fontSize:10,fontWeight:700,letterSpacing:"0.1em",textTransform:"uppercase",color:"#3a4050"}}>
+                      Or paste content
+                    </div>
+                    <div style={{display:"flex",gap:2,background:"#1e2025",borderRadius:6,padding:2}}>
+                      {[["html","HTML"],["markdown","Markdown"]].map(([id,label])=>(
+                        <button key={id} onClick={()=>setInputMode(id)} style={{
+                          background: inputMode===id ? "#2e3240" : "none",
+                          border:"none", color: inputMode===id ? "#e0dcd4" : "#555",
+                          fontSize:11, fontFamily:"inherit", padding:"3px 10px", borderRadius:5,
+                          cursor:"pointer", fontWeight: inputMode===id ? 600 : 400
+                        }}>{label}</button>
+                      ))}
+                    </div>
                   </div>
                   <textarea
                     value={html}
                     onChange={e=>setHtml(e.target.value)}
-                    placeholder={"<h1>My Document</h1>\n<p>Paste exported HTML here...</p>"}
+                    placeholder={inputMode === "markdown"
+                      ? "# My Document\n\nPaste **Markdown** here..."
+                      : "<h1>My Document</h1>\n<p>Paste exported HTML here...</p>"}
                     style={{
                       flex:1, minHeight:220, background:"#111316",
                       border:"1px solid #1e2025", borderRadius:8,
